@@ -10,8 +10,8 @@ from acquire import get_titanic_data, get_iris_data
 # Prep Iris Data
 def prep_iris():
     df = get_iris_data()
-    df = df.drop(columns='species_id')
-    dummy = pd.get_dummies(df.species, dummy_na=False, drop_first=True)
+    df = df.drop(columns='species_id').rename(columns={'species_name': 'species'})
+    dummy = pd.get_dummies(df.species, drop_first=True)
     df = pd.concat([df, dummy], axis=1)
     return df
 
@@ -28,8 +28,6 @@ def titanic_split(df):
                                    random_state=123, 
                                    stratify=train_validate.survived)
     return train, validate, test
-
-
 
 def impute_mean_age(train, validate, test):
     '''
@@ -50,7 +48,6 @@ def impute_mean_age(train, validate, test):
     test['age'] = imputer.transform(test[['age']])
     
     return train, validate, test
-
 
 def prep_titanic(cached=True):
     '''
