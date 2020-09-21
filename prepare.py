@@ -22,10 +22,10 @@ def titanic_split(df):
     Returns train, validate, and test dfs.
     '''
     train_validate, test = train_test_split(df, test_size=.2, 
-                                        random_state=123, 
+                                        random_state=666, 
                                         stratify=df.survived)
     train, validate = train_test_split(train_validate, test_size=.3, 
-                                   random_state=123, 
+                                   random_state=666, 
                                    stratify=train_validate.survived)
     return train, validate, test
 
@@ -49,13 +49,13 @@ def impute_mean_age(train, validate, test):
     
     return train, validate, test
 
-def prep_titanic(cached=True):
+def prep_titanic():
     '''
     This function reads titanic data into a df from a csv file.
     Returns prepped train, validate, and test dfs
     '''
     # use my acquire function to read data into a df from a csv file
-    df = get_titanic_data(cached)
+    df = get_titanic_data()
     
     # drop rows where embarked/embark town are null values
     df = df[~df.embarked.isnull()]
@@ -68,11 +68,10 @@ def prep_titanic(cached=True):
     
     # drop the deck column
     df = df.drop(columns=['passenger_id', 'deck', 'sex', 'embarked', 'class', 'embark_town'])
-    
-    # split data into train, validate, test dfs
-    train, validate, test = titanic_split(df)
-    
-    # impute mean of age into null values in age column
-    train, validate, test = impute_mean_age(train, validate, test)
-    
-    return train, validate, test
+
+    # impute missing age values
+    imp_mean = SimpleImputer(missing_values=np.nan, strategy='mean')
+    imputer = imp_mean.fit(df[['age']])
+    df[['age']] = imputer.transform(df[['age']])
+
+    return df
